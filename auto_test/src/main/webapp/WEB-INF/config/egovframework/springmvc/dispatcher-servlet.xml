@@ -8,14 +8,14 @@
                 http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
 
     <context:component-scan base-package="egovframework">
-        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+<!--         <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
         <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
-        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/> -->
     </context:component-scan>
 
     <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
         <property name="webBindingInitializer">
-            <bean class="egovframework.example.cmmn.web.EgovBindingInitializer"/>
+            <bean class="egovframework.kss.cmmn.web.EgovBindingInitializer"/>
         </property>
     </bean>
     <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
@@ -46,10 +46,10 @@
 
     <bean class="org.springframework.web.servlet.view.UrlBasedViewResolver" p:order="1"
 	    p:viewClass="org.springframework.web.servlet.view.JstlView"
-	    p:prefix="/WEB-INF/jsp/egovframework/example/" p:suffix=".jsp"/>
+	    p:prefix="/WEB-INF/jsp/" p:suffix=".jsp"/>
 
     <!-- For Pagination Tag -->
-    <bean id="imageRenderer" class="egovframework.example.cmmn.web.EgovImgPaginationRenderer"/>
+    <bean id="imageRenderer" class="egovframework.kss.cmmn.web.EgovImgPaginationRenderer"/>
 
     <bean id="paginationManager" class="egovframework.rte.ptl.mvc.tags.ui.pagination.DefaultPaginationManager">
         <property name="rendererType">
