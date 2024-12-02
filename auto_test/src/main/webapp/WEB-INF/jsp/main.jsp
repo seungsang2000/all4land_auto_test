@@ -4,23 +4,23 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>엑셀 파일 업로드</title>
+<title>개방해 OpenAPI 테스트</title>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(function(){
     $("form").on("submit", function(event){
-        event.preventDefault(); // 기본 submit 이벤트를 막습니다.
+        event.preventDefault(); 
         
-        var formData = new FormData(this); // 폼 데이터 가져오기
+        var formData = new FormData(this); 
 
         $.ajax({
-            url: "/uploadExcel.do",  // 서버의 업로드 처리 URL
+            url: "/uploadExcel.do", 
             type: "POST",
             data: formData,
-            processData: false,  // 파일 데이터 전송 시 false로 설정
-            contentType: false,  // contentType을 자동으로 설정하게끔
+            processData: false,  
+            contentType: false,  
             xhrFields: {
-                responseType: 'blob'  // 응답을 Blob으로 설정
+                responseType: 'blob'  
             },
             success: function(response) {
                 // 서버에서 반환된 엑셀 파일을 다운로드 처리
@@ -39,7 +39,7 @@ $(function(){
 </script>
 </head>
 <body>
-<h3>엑셀 업로드</h3>
+<h3>개방해 OpenAPI 테스트</h3>
     <!-- 엑셀 파일 업로드 폼 -->
     <form name="popForm" method="post" enctype="multipart/form-data">
          <p><label for="excelFile">파일찾기</label></p>
@@ -48,7 +48,7 @@ $(function(){
 
         <!-- 업로드 버튼 -->
         <div class="btn-area">
-            <button type="submit" class="btn btn-yellow btn-ok">업로드</button>
+            <button type="submit" class="btn btn-yellow btn-ok">테스트</button>
             <button type="button" onclick="self.close();" class="btn btn-yellow btn-cancel">창닫기</button>
         </div>
     </form>

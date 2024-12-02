@@ -8,6 +8,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class LayerData {
+	private int order;
 	private String layerName;
 	private String layerEnglishName;
 	private String url1;
@@ -15,7 +16,8 @@ public class LayerData {
 	private String url3;
 
 	// 생성자
-	public LayerData(String layerName, String layerEnglishName, String url1, String url2, String url3) {
+	public LayerData(int order, String layerName, String layerEnglishName, String url1, String url2, String url3) {
+		this.order = order;
 		this.layerName = layerName;
 		this.layerEnglishName = layerEnglishName;
 		this.url1 = url1;

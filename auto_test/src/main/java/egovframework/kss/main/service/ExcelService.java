@@ -1,6 +1,8 @@
 package egovframework.kss.main.service;
 
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +54,7 @@ public class ExcelService {
 			Sheet sheet = workbook.getSheetAt(0);  // 첫 번째 시트 선택
 
 			// 데이터는 3번째 행 (인덱스 2)부터 시작
-			for (int i = 2; i <= sheet.getLastRowNum(); i++) {
+			for (int i = 2; i < sheet.getLastRowNum() && i < 12; i++) {
 				Row row = sheet.getRow(i);
 				if (row == null)
 					continue;
@@ -63,7 +65,18 @@ public class ExcelService {
 				String url2 = getCellValue(row.getCell(11));  // L열
 				String url3 = getCellValue(row.getCell(12));  // M열
 
-				dataList.add(new LayerData(layerName, layerEnglishName, url1, url2, url3));
+				// URL1 테스트 및 결과 저장
+				url1 = !url1.isEmpty() ? (callApi(url1) ? "O" : "X") : "입력값 없음";
+
+				// URL2 테스트 및 결과 저장
+				url2 = !url2.isEmpty() ? (callApi(url2) ? "O" : "X") : "입력값 없음";
+
+				// URL3 테스트 및 결과 저장
+				url3 = !url3.isEmpty() ? (callApi(url3) ? "O" : "X") : "입력값 없음";
+
+				System.out.println(layerName + "= WMS : " + url1 + ", WMS 이미지 : " + url2 + ", WFS : " + url3);
+
+				dataList.add(new LayerData(i - 1, layerName, layerEnglishName, url1, url2, url3));
 			}
 		} catch (Exception e) {
 			System.out.println("에러: " + e.getMessage());
@@ -87,6 +100,31 @@ public class ExcelService {
 				return cell.getCellFormula();
 			default:
 				return "";
+		}
+	}
+
+	public static boolean callApi(String apiUrl) {
+		HttpURLConnection connection = null;
+		try {
+
+			URL url = new URL(apiUrl);
+
+			// HttpURLConnection 열기
+			connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("GET");
+			connection.setConnectTimeout(30000);
+			connection.setReadTimeout(30000);
+
+			// 요청 실행 및 응답 코드 확인
+			int responseCode = connection.getResponseCode();
+			return responseCode >= 200 && responseCode < 300;  // 2xx 응답 성공
+		} catch (Exception e) {
+			System.err.println("API 호출 실패: " + apiUrl + " - " + e.getMessage());
+			return false;
+		} finally {
+			if (connection != null) {
+				connection.disconnect();  // 연결 해제
+			}
 		}
 	}
 }
