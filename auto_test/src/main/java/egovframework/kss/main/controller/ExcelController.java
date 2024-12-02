@@ -113,19 +113,19 @@ public class ExcelController {
 			}
 
 			// 각 열에 대해 자동 크기 조정
-			for (int i = 0; i <= 5; i++) {
+			for (int i = 0; i <= 6; i++) {
 				sheet.autoSizeColumn(i);
 			}
 
-			// 엑셀 파일을 서버의 로컬 디스크에 저장 (Optional)
-			try (FileOutputStream fileOut = new FileOutputStream("C:/Temp/processedLayerData.xlsx")) {
+			// 엑셀 파일을 서버의 로컬 디스크에 저장 (선택)
+			try (FileOutputStream fileOut = new FileOutputStream("C:/Temp/TestData.xlsx")) {
 				workbook.write(fileOut);
 			}
-			System.out.println("엑셀 파일이 서버에 저장되었습니다. 파일 경로: C:/Temp/processedLayerData.xlsx");
+			System.out.println("엑셀 파일이 서버에 저장되었습니다. 파일 경로: C:/Temp/TestData.xlsx");
 
 			// 파일 다운로드 응답 설정
 			response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-			response.setHeader("Content-Disposition", "attachment; filename=processedLayerData.xlsx");
+			response.setHeader("Content-Disposition", "attachment; filename=TestData.xlsx");
 
 			// 엑셀 파일을 HTTP 응답으로 전송
 			try (ServletOutputStream outputStream = response.getOutputStream()) {

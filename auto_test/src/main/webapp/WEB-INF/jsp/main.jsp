@@ -11,7 +11,18 @@ $(function(){
     $("form").on("submit", function(event){
         event.preventDefault(); 
         
+        
         var formData = new FormData(this); 
+        
+     	// 파일이 비어 있는지 확인
+        var fileInput = $("#excelFile")[0]; // 파일 입력 필드
+        if (fileInput.files.length === 0) {
+            alert("엑셀 파일을 선택해주세요.");
+            return;  // 파일이 없으면 업로드를 중지
+        }
+        
+        
+        $("#testBtn").attr("disabled",true);
 
         $.ajax({
             url: "/uploadExcel.do", 
@@ -32,6 +43,9 @@ $(function(){
             },
             error: function(xhr, status, error) {
                 alert("파일 업로드 실패: " + error);
+            },
+            complete: function(){
+                $("#testBtn").attr("disabled",false);
             }
         });
     });
@@ -44,12 +58,12 @@ $(function(){
     <form name="popForm" method="post" enctype="multipart/form-data">
          <p><label for="excelFile">파일찾기</label></p>
 
-         <p><input name="excelFile" id="excelFile" type="file" size="30"></p>
+         <p><input name="excelFile" id="excelFile" type="file" size="30" accept=".xls,.xlsx"></p>
 
         <!-- 업로드 버튼 -->
         <div class="btn-area">
-            <button type="submit" class="btn btn-yellow btn-ok">테스트</button>
-            <button type="button" onclick="self.close();" class="btn btn-yellow btn-cancel">창닫기</button>
+            <button type="submit" id="testBtn" class="btn btn-yellow btn-ok">테스트</button>
+           <!--  <button type="button" onclick="self.close();" class="btn btn-yellow btn-cancel">창닫기</button> -->
         </div>
     </form>
 </body>
