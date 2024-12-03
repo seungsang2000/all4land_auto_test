@@ -1,6 +1,8 @@
 package egovframework.kss.main.service;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -13,6 +15,8 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.imaging.ImageReadException;
+import org.apache.commons.imaging.Imaging;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -23,6 +27,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import egovframework.kss.main.model.LayerData;
 
@@ -65,16 +72,18 @@ public class ExcelService {
 			Row headerRow = sheet.getRow(1); // 헤더 뽑아오기
 			String layerNameHeader = getCellValue(headerRow.getCell(3)); // D열
 			String layerEnglishHeader = getCellValue(headerRow.getCell(4)); // E열
-			String url1Header = getCellValue(headerRow.getCell(10)); // K열
-			String url2Header = getCellValue(headerRow.getCell(11)); // L열
-			String url3Header = getCellValue(headerRow.getCell(12)); // M열
+			String url1Header = getCellValue(headerRow.getCell(12)); // M열
+			String url2Header = getCellValue(headerRow.getCell(13)); // N열
+			String url3Header = getCellValue(headerRow.getCell(14)); // O열
+			String XMLHeader = getCellValue(headerRow.getCell(15)); // P열
+			String JSONHeader = getCellValue(headerRow.getCell(16)); // Q열
 
-			if (!layerNameHeader.equals("명칭") || !layerEnglishHeader.equals("레이어명") || !url1Header.equals("WMS 예시") || !url2Header.equals("WMS 이미지") || !url3Header.equals("WFS")) { // 액셀 파일 형식 검사
+			if (!layerNameHeader.equals("명칭") || !layerEnglishHeader.equals("레이어명") || !url1Header.equals("WMS 예시") || !url2Header.equals("WMS 이미지") || !url3Header.equals("WFS") || !XMLHeader.equals("XML") || !JSONHeader.equals("JSON")) { // 액셀 파일 형식 검사
 				throw new Exception("액셀 파일의 양식이 다릅니다"); // 액셀 헤더가 양식과 다른 경우, 예외처리
 			}
 
 			// 데이터는 3번째 행 (인덱스 2)부터 시작
-			for (int i = 2; i < sheet.getLastRowNum() && i < 12; i++) {
+			for (int i = 2; i < sheet.getLastRowNum() && i < 25; i++) { // '&& i < ???'은 테스트시 api 전체가 아닌 일부만을 호출하기 위한 것으로, 불필요 할 시 삭제
 				boolean comma = false; // 쉼표 찍을 건지
 				Row row = sheet.getRow(i);
 				if (row == null)
@@ -82,39 +91,45 @@ public class ExcelService {
 
 				String layerName = getCellValue(row.getCell(3));  // D열
 				String layerEnglishName = getCellValue(row.getCell(4));  // E열
-				String url1 = getCellValue(row.getCell(10));  // K열
-				String url2 = getCellValue(row.getCell(11));  // L열
-				String url3 = getCellValue(row.getCell(12));  // M열
+				String url1 = getCellValue(row.getCell(12));  // K열
+				String url2 = getCellValue(row.getCell(13));  // L열
+				String url3 = getCellValue(row.getCell(14));  // M열
+				String XMLUrl = getCellValue(row.getCell(15));  // L열
+				String JSONUrl = getCellValue(row.getCell(16));  // M열
 				String note = "";
 
-				if (layerName.isEmpty() || layerEnglishName.isEmpty()) { //레이어의 명칭이나 레이어명이 없는 항목은 테스트하지 않고 넘어감. url 틀릴 경우 대비
-					if (layerName.isEmpty()) {
-						note += "레이명 명칭 없음";
+				if (layerName.trim().isEmpty() || layerEnglishName.trim().isEmpty()) { //레이어의 명칭이나 레이어명이 없는 항목은 테스트하지 않고 넘어감. url 틀릴 경우 대비
+					if (layerName.trim().isEmpty()) {
+						note += "레이어 명칭 없음";
 						comma = true;
 					}
 
-					if (layerEnglishName.isEmpty()) {
+					if (layerEnglishName.trim().isEmpty()) {
 						if (comma) {
-							note += ",";
+							note += ", ";
 						}
 						note += "레이어명 없음";
 					}
-					dataList.add(new LayerData(i - 1, layerName, layerEnglishName, "", "", "", note));
+					dataList.add(new LayerData(i - 1, layerName, layerEnglishName, "", "", "", "", "", note));
 					continue;
 				}
 
 				// URL1 테스트 및 결과 저장
-				url1 = !url1.isEmpty() ? (callWMS(url1, layerEnglishName) ? "O" : "X") : "입력값 없음";
+				url1 = !url1.trim().isEmpty() ? (callWMS(url1, layerEnglishName) ? "O" : "X") : "입력값 없음";
 
 				// URL2 테스트 및 결과 저장
-				url2 = !url2.isEmpty() ? (callWMSImage(url2) ? "O" : "X") : "입력값 없음";
+				url2 = !url2.trim().isEmpty() ? (callWMSImage(url2) ? "O" : "X") : "입력값 없음";
 
 				// URL3 테스트 및 결과 저장
-				url3 = !url3.isEmpty() ? (callWFS(url3, layerEnglishName) ? "O" : "X") : "입력값 없음";
+				url3 = !url3.trim().isEmpty() ? (callWFS(url3, layerEnglishName) ? "O" : "X") : "입력값 없음";
 
-				System.out.println(layerName + "= WMS : " + url1 + ", WMS 이미지 : " + url2 + ", WFS : " + url3);
+				XMLUrl = !XMLUrl.trim().isEmpty() ? (callXML(XMLUrl) ? "O" : "X") : "입력값 없음";
 
-				dataList.add(new LayerData(i - 1, layerName, layerEnglishName, url1, url2, url3, note));
+				JSONUrl = !JSONUrl.trim().isEmpty() ? (callJSON(JSONUrl) ? "O" : "X") : "입력값 없음";
+
+				System.out.println(layerName + "= WMS : " + url1 + ", WMS 이미지 : " + url2 + ", WFS : " + url3 + ", XMLUrl : " + XMLUrl + ", JSONUrl : " + JSONUrl);
+
+				dataList.add(new LayerData(i - 1, layerName, layerEnglishName, url1, url2, url3, XMLUrl, JSONUrl, note));
 			}
 		} catch (Exception e) {
 			System.out.println("에러: " + e.getMessage());
@@ -140,31 +155,6 @@ public class ExcelService {
 				return "";
 		}
 	}
-
-	/*public boolean callApi(String apiUrl) {
-		HttpURLConnection connection = null;
-		try {
-	
-			URL url = new URL(apiUrl);
-	
-			// HttpURLConnection 열기
-			connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestMethod("GET");
-			connection.setConnectTimeout(30000);
-			connection.setReadTimeout(30000);
-	
-			// 요청 실행 및 응답 코드 확인
-			int responseCode = connection.getResponseCode();
-			return responseCode >= 200 && responseCode < 300;  // 2xx 응답 성공 -> 이걸로 안된다. 정규식으로 바꿀 것 
-		} catch (Exception e) {
-			System.err.println("API 호출 실패: " + apiUrl + " - " + e.getMessage());
-			return false;
-		} finally {
-			if (connection != null) {
-				connection.disconnect();  // 연결 해제
-			}
-		}
-	}*/
 
 	//WMS 호출 검사 코드
 	public boolean callWMS(String apiUrl, String layerCode) {
@@ -235,7 +225,16 @@ public class ExcelService {
 			// Content-Type 헤더 확인
 			String contentType = connection.getContentType();
 			if (contentType != null && contentType.startsWith("image/png")) {
-				return true; // png 파일임
+				InputStream inputStream = connection.getInputStream();
+				boolean isMonochrome = isImageMonochrome(inputStream); // 이미지가 단색인지 여부 판단
+
+				if (isMonochrome) {
+					System.out.println("이미지에서 레이어를 확인 할 수 없습니다.");
+					return false; // 단색이라면 레이어가 찍혀있는 이미지가 아니므로 false 반환
+				} else {
+					System.out.println("이미지에 레이어가 존재합니다.");
+					return true; // 레이어가 찍혀있는 이미지라면 true 반환
+				}
 			} else {
 				return false; // png 파일이 아님
 			}
@@ -251,7 +250,7 @@ public class ExcelService {
 	}
 
 	// WFS 호출. 정규식이 아닌 XML 파싱 사용
-	public boolean callWFS(String apiUrl, String layerCode) {
+	public boolean callWFS(String apiUrl, String layerCode) {  //전체를 가져와서 상당히 비효율적임. 후에 SAX Parser으로 수정
 		HttpURLConnection connection = null;
 		try {
 
@@ -268,7 +267,7 @@ public class ExcelService {
 			if (nList.getLength() > 0) {
 				return true;
 			} else {
-				return false; // 이거도 후에 수정
+				return false;
 			}
 
 		} catch (Exception e) {
@@ -280,6 +279,116 @@ public class ExcelService {
 			}
 		}
 
+	}
+
+	// XML 호출.  XML 파싱 사용
+	public boolean callXML(String apiUrl) {
+		HttpURLConnection connection = null;
+		try {
+
+			DocumentBuilderFactory dbFactoty = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactoty.newDocumentBuilder();
+			Document doc = dBuilder.parse(apiUrl);
+
+			doc.getDocumentElement().normalize();
+			System.out.println("Root element: " + doc.getDocumentElement().getNodeName());
+
+			NodeList nList = doc.getElementsByTagName("item");
+			System.out.println("파싱할 리스트 수 : " + nList.getLength()); // item 태그 개수 가져오기
+
+			if (nList.getLength() > 0) {
+				return true;
+			} else {
+				return false;
+			}
+
+		} catch (Exception e) {
+			System.err.println("API 호출 실패: " + apiUrl + "-" + e.getMessage());
+			return false;
+		} finally {
+			if (connection != null) {
+				connection.disconnect();
+			}
+		}
+
+	}
+
+	public boolean callJSON(String jsonUrl) {
+		HttpURLConnection connection = null;
+		try {
+			// URL 연결 설정
+			URL url = new URL(jsonUrl);
+			connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("GET");
+			connection.setConnectTimeout(20000);
+			connection.setReadTimeout(20000);
+
+			// 응답 코드 확인
+			int responseCode = connection.getResponseCode();
+			if (responseCode == HttpURLConnection.HTTP_OK) {
+				String contentType = connection.getHeaderField("Content-Type");
+				if (contentType != null && contentType.contains("application/json")) {
+					// JSON 데이터 읽기
+					BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+					StringBuilder response = new StringBuilder();
+					String line;
+					while ((line = reader.readLine()) != null) {
+						response.append(line);
+					}
+					reader.close();
+
+					// JSON 데이터 내부 값 확인
+					return isJsonDataNonEmpty(response.toString());
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (connection != null) {
+				connection.disconnect();
+			}
+		}
+		return false;
+	}
+
+	private boolean isJsonDataNonEmpty(String jsonData) {
+		try {
+			// JSON 파싱
+			ObjectMapper objectMapper = new ObjectMapper();
+			JsonNode rootNode = objectMapper.readTree(jsonData);
+
+			// 객체 또는 배열이 비어있는지 확인
+			if (rootNode.isObject()) {
+				return rootNode.size() > 0; // 객체에 속성이 있는지 확인
+			} else if (rootNode.isArray()) {
+				return rootNode.size() > 0; // 배열에 요소가 있는지 확인
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	// 단색 이미지인지 확인하는 메소드
+	public boolean isImageMonochrome(InputStream inputStream) throws IOException, ImageReadException {
+		BufferedImage image = Imaging.getBufferedImage(inputStream);
+
+		// 첫 번째 픽셀 색상 추출
+		int firstPixelColor = image.getRGB(0, 0);
+
+		// 이미지의 모든 픽셀을 순차적으로 확인... 매우 비효율적인 방식. 변경해야 할듯
+		for (int y = 0; y < image.getHeight(); y++) {
+			for (int x = 0; x < image.getWidth(); x++) {
+				int pixelColor = image.getRGB(x, y);
+
+				// 첫 번째 픽셀과 다른 색상이 존재하면 단색 아님
+				if (pixelColor != firstPixelColor) {
+					return false; // 단색이 아님
+				}
+			}
+		}
+
+		return true; // 모든 픽셀이 동일한 색상 => 단색
 	}
 
 }

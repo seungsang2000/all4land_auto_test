@@ -80,33 +80,13 @@ public class ExcelController {
 
 			// 헤더 생성
 			Row headerRow = sheet.createRow(1);
-			Cell cell0 = headerRow.createCell(1);
-			cell0.setCellValue("번호");
-			cell0.setCellStyle(headerStyle); // setCellStyle은 메소드 체이닝이 안되므로 따로 분리
+			String[] headers = { "번호", "명칭", "레이어명", "WMS", "WMS 이미지", "WFS", "XML", "JSON", "비고" };
 
-			Cell cell1 = headerRow.createCell(2);
-			cell1.setCellValue("명칭");
-			cell1.setCellStyle(headerStyle);
-
-			Cell cell2 = headerRow.createCell(3);
-			cell2.setCellValue("레이어명");
-			cell2.setCellStyle(headerStyle);
-
-			Cell cell3 = headerRow.createCell(4);
-			cell3.setCellValue("WMS");
-			cell3.setCellStyle(headerStyle);
-
-			Cell cell4 = headerRow.createCell(5);
-			cell4.setCellValue("WMS 이미지");
-			cell4.setCellStyle(headerStyle);
-
-			Cell cell5 = headerRow.createCell(6);
-			cell5.setCellValue("WFS");
-			cell5.setCellStyle(headerStyle);
-
-			Cell cell6 = headerRow.createCell(7);
-			cell6.setCellValue("비고");
-			cell6.setCellStyle(headerStyle);
+			for (int i = 0; i < headers.length; i++) {
+				Cell cell = headerRow.createCell(i + 1); // 셀 인덱스는 1부터 시작
+				cell.setCellValue(headers[i]);
+				cell.setCellStyle(headerStyle);
+			}
 
 			// 데이터 추가
 			for (int i = 0; i < dataList.size(); i++) {
@@ -118,12 +98,18 @@ public class ExcelController {
 				dataRow.createCell(4).setCellValue(data.getUrl1());
 				dataRow.createCell(5).setCellValue(data.getUrl2());
 				dataRow.createCell(6).setCellValue(data.getUrl3());
-				dataRow.createCell(7).setCellValue(data.getNote());
+				dataRow.createCell(7).setCellValue(data.getXMLUrl());
+				dataRow.createCell(8).setCellValue(data.getJSONUrl());
+				dataRow.createCell(9).setCellValue(data.getNote());
 			}
 
 			// 각 열에 대해 자동 크기 조정
-			for (int i = 0; i <= 7; i++) {
+			for (int i = 0; i <= headers.length; i++) {
 				sheet.autoSizeColumn(i);
+				int colWidth = sheet.getColumnWidth(i);
+				if (colWidth < 3000) {  // 너무 좁으면 기본 너비로 설정
+					sheet.setColumnWidth(i, 3000);
+				}
 			}
 
 			// 엑셀 파일을 서버의 로컬 디스크에 저장 (선택)

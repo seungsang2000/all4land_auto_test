@@ -79,10 +79,10 @@ $(function(){
 </script>
 </head>
 <body>
-<h3>개방해 OpenAPI 테스트</h3>
+<h3>개방해 OpenAPI 자동 테스트</h3>
     <!-- 엑셀 파일 업로드 폼 -->
     <form name="popForm" method="post" enctype="multipart/form-data">
-         <p><label for="excelFile">파일찾기</label></p>
+         <h4><label for="excelFile">파일찾기</label></h4>
 
          <p><input name="excelFile" id="excelFile" type="file" size="30" accept=".xls,.xlsx"></p>
 
