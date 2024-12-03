@@ -27,6 +27,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -250,26 +256,26 @@ public class ExcelService {
 	}
 
 	// WFS 호출. 정규식이 아닌 XML 파싱 사용
-	public boolean callWFS(String apiUrl, String layerCode) {  //전체를 가져와서 상당히 비효율적임. 후에 SAX Parser으로 수정
+	/*public boolean callWFS(String apiUrl, String layerCode) {  //전체를 가져와서 상당히 비효율적임. 후에 SAX Parser으로 수정
 		HttpURLConnection connection = null;
 		try {
-
+	
 			DocumentBuilderFactory dbFactoty = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactoty.newDocumentBuilder();
 			Document doc = dBuilder.parse(apiUrl);
-
+	
 			doc.getDocumentElement().normalize();
 			System.out.println("Root element: " + doc.getDocumentElement().getNodeName());
-
+	
 			NodeList nList = doc.getElementsByTagName("mapprime:" + layerCode.toLowerCase()); // xml 파싱시 대소문자 구분하므로, 소문자로 변환
 			System.out.println("파싱할 리스트 수 : " + nList.getLength()); // 이거 이용해볼까? 0개 이상일때 성공시켜도 될거 같은데.
-
+	
 			if (nList.getLength() > 0) {
 				return true;
 			} else {
 				return false;
 			}
-
+	
 		} catch (Exception e) {
 			System.err.println("API 호출 실패: " + apiUrl + "-" + e.getMessage());
 			return false;
@@ -278,7 +284,48 @@ public class ExcelService {
 				connection.disconnect();
 			}
 		}
+	
+	}*/
+	public boolean callWFS(String apiUrl, String layerCode) {
+		try {
+			// XML 파서 준비
+			XMLReader xmlReader = XMLReaderFactory.createXMLReader();
 
+			// 기본 핸들러 설정
+			xmlReader.setContentHandler(new DefaultHandler() {
+				@Override
+				public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+					// "mapprime:" + layerCode.toLowerCase() 태그를 찾으면 파싱 종료
+					if (qName.equalsIgnoreCase("mapprime:" + layerCode.toLowerCase())) {
+						// 태그 발견 시 예외를 던져 파싱을 중단시킴
+						throw new SAXException("레이어 발견 성공, 파싱 중지.");
+					}
+				}
+
+				@Override
+				public void endElement(String uri, String localName, String qName) throws SAXException {
+					// 필요시 종료 처리
+				}
+
+				@Override
+				public void endDocument() throws SAXException {
+					// 문서가 끝났을 때 처리 (필요시)
+				}
+			});
+
+			// URL에서 XML 데이터 읽기
+			InputStream inputStream = new URL(apiUrl).openStream();
+			xmlReader.parse(new InputSource(inputStream));
+
+			// SAXException이 발생하지 않으면 레이어가 존재하지 않음
+			return false;
+		} catch (SAXException e) {
+			return e.getMessage().contains("레이어 발견 성공");
+		} catch (Exception e) {
+			// 기타 예외 발생 시 처리
+			System.err.println("API 호출 실패: " + apiUrl + " - " + e.getMessage());
+			return false;
+		}
 	}
 
 	// XML 호출.  XML 파싱 사용
@@ -291,7 +338,6 @@ public class ExcelService {
 			Document doc = dBuilder.parse(apiUrl);
 
 			doc.getDocumentElement().normalize();
-			System.out.println("Root element: " + doc.getDocumentElement().getNodeName());
 
 			NodeList nList = doc.getElementsByTagName("item");
 			System.out.println("파싱할 리스트 수 : " + nList.getLength()); // item 태그 개수 가져오기
@@ -376,7 +422,7 @@ public class ExcelService {
 		// 첫 번째 픽셀 색상 추출
 		int firstPixelColor = image.getRGB(0, 0);
 
-		// 이미지의 모든 픽셀을 순차적으로 확인... 매우 비효율적인 방식. 변경해야 할듯
+		// 이미지의 모든 픽셀을 순차적으로 확인... 매우 비효율적인 방식. 변경해야 할듯 => 생각보다 느리지 않다? wms 이미지 자체가 그리 크지 않게 와서 빠르게 처리된다
 		for (int y = 0; y < image.getHeight(); y++) {
 			for (int x = 0; x < image.getWidth(); x++) {
 				int pixelColor = image.getRGB(x, y);
