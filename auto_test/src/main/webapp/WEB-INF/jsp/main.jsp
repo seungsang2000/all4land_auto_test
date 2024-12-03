@@ -24,35 +24,43 @@ $(function(){
         
         $("#testBtn").attr("disabled",true);
 
-        $.ajax({
-            url: "/uploadExcel.do", 
-            type: "POST",
-            data: formData,
-            processData: false,  
-            contentType: false,  
-            xhrFields: {
-                responseType: 'blob'  
-            },
-            success: function(response) {
-                // 서버에서 반환된 엑셀 파일을 다운로드 처리
-                var blob = new Blob([response], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-                if(blob.size > 0){
-                    var link = document.createElement("a");
-                    link.href = URL.createObjectURL(blob);
-                    link.download = "테스트 결과.xlsx"; // 다운로드 파일명
-                    link.click();
-                } else{
-                    alert("테스트 실패: ")
+        fetch('/uploadExcel.do', {
+            method: 'POST',
+            body: formData,  // formData에 파일 포함
+        })
+            .then(response => {
+                if (response.ok) {
+                    const contentType = response.headers.get("Content-Type");
+                    if (contentType.includes("application/json")) {
+                        return response.json().then(json => {
+                            throw new Error(json.error);  // 서버에서 보낸 JSON 에러 메시지
+                        });
+                    } else if (contentType.includes("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
+                        return response.blob();  // 엑셀 파일 다운로드 처리
+                    }
+                } else {
+                    return response.text().then(text => {
+                        throw new Error(text);  // 실패한 경우 응답 텍스트 반환
+                    });
                 }
-                
-            },
-            error: function(xhr, status, error) {
-                alert("파일 업로드 실패: " + error);
-            },
-            complete: function(){
-                $("#testBtn").attr("disabled",false);
-            }
-        });
+            })
+            .then(blob => {
+                // Blob 형식으로 엑셀 파일 다운로드 처리
+                if (blob.size > 0) {
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = "테스트 결과.xlsx";  // 다운로드 파일명
+                    link.click();
+                } else {
+                    alert("엑셀 파일 다운로드에 실패했습니다.");
+                }
+            })
+            .catch(error => {
+                alert(error.message || "파일 업로드에 실패했습니다.");
+            })
+            .finally(() => {
+                $("#testBtn").attr("disabled", false);  // 버튼 활성화
+            });
     });
 });
 </script>

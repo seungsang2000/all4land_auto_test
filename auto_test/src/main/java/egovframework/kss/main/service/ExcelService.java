@@ -99,6 +99,7 @@ public class ExcelService {
 						}
 						note += "레이어명 없음";
 					}
+					dataList.add(new LayerData(i - 1, layerName, layerEnglishName, "", "", "", note));
 					continue;
 				}
 

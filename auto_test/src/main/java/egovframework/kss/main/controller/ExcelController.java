@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import egovframework.kss.main.model.LayerData;
@@ -49,10 +50,13 @@ public class ExcelController {
 	}*/
 
 	@PostMapping("/uploadExcel.do")
+	@ResponseBody
 	public void uploadExcel(@RequestParam("excelFile") MultipartFile file, HttpServletResponse response) {
 		try {
 			if (file == null || file.isEmpty()) {
-				System.out.println("파일이 전달되지 않았습니다.");
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);  // 400 오류
+				response.setContentType("application/json; charset=UTF-8");
+				response.getWriter().write("파일이 전달되지 않았습니다.");
 				return;
 			}
 			System.out.println("파일 이름: " + file.getOriginalFilename());
@@ -118,7 +122,7 @@ public class ExcelController {
 			}
 
 			// 각 열에 대해 자동 크기 조정
-			for (int i = 0; i <= 6; i++) {
+			for (int i = 0; i <= 7; i++) {
 				sheet.autoSizeColumn(i);
 			}
 
@@ -144,8 +148,13 @@ public class ExcelController {
 			}
 
 		} catch (Exception e) {
-			System.out.println("파일 처리 중 오류 발생: " + e.getMessage());
-			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);  // 500 오류
+			response.setContentType("application/json; charset=UTF-8");
+			try {
+				response.getWriter().write(e.getMessage());
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 		}
 	}
 
