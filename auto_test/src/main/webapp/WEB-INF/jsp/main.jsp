@@ -36,10 +36,15 @@ $(function(){
             success: function(response) {
                 // 서버에서 반환된 엑셀 파일을 다운로드 처리
                 var blob = new Blob([response], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-                var link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = "테스트 결과.xlsx"; // 다운로드 파일명
-                link.click();
+                if(blob.size > 0){
+                    var link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = "테스트 결과.xlsx"; // 다운로드 파일명
+                    link.click();
+                } else{
+                    alert("테스트 실패: ")
+                }
+                
             },
             error: function(xhr, status, error) {
                 alert("파일 업로드 실패: " + error);

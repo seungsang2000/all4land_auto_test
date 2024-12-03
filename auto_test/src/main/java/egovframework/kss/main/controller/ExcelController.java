@@ -100,6 +100,10 @@ public class ExcelController {
 			cell5.setCellValue("WFS");
 			cell5.setCellStyle(headerStyle);
 
+			Cell cell6 = headerRow.createCell(7);
+			cell6.setCellValue("비고");
+			cell6.setCellStyle(headerStyle);
+
 			// 데이터 추가
 			for (int i = 0; i < dataList.size(); i++) {
 				LayerData data = dataList.get(i);
@@ -110,6 +114,7 @@ public class ExcelController {
 				dataRow.createCell(4).setCellValue(data.getUrl1());
 				dataRow.createCell(5).setCellValue(data.getUrl2());
 				dataRow.createCell(6).setCellValue(data.getUrl3());
+				dataRow.createCell(7).setCellValue(data.getNote());
 			}
 
 			// 각 열에 대해 자동 크기 조정
