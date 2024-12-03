@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+    <%@ page import="java.util.Date , java.text.SimpleDateFormat" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,6 +8,7 @@
 <title>개방해 OpenAPI 테스트</title>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+
 $(function(){
     $("form").on("submit", function(event){
         event.preventDefault(); 
@@ -46,10 +48,21 @@ $(function(){
             })
             .then(blob => {
                 // Blob 형식으로 엑셀 파일 다운로드 처리
-                if (blob.size > 0) {
+                if (blob.size > 0) {             
                     const link = document.createElement("a");
                     link.href = URL.createObjectURL(blob);
-                    link.download = "테스트 결과.xlsx";  // 다운로드 파일명
+                    
+                    const now = new Date();
+                    const year = now.getFullYear().toString().slice(2); // 연도 마지막 두 자리
+                    const month = String(now.getMonth() + 1).padStart(2, '0'); // 월 (0부터 시작하므로 +1)
+                    const date = String(now.getDate()).padStart(2, '0'); // 일
+                    const hours = String(now.getHours()).padStart(2, '0'); // 시
+                    const minutes = String(now.getMinutes()).padStart(2, '0'); // 분
+                    const seconds = String(now.getSeconds()).padStart(2, '0'); // 초
+                    
+                    const timestamp = "_"+year+month+date+hours+minutes+seconds;
+                    
+                 	link.download = "테스트 결과"+timestamp+".xlsx";  // 다운로드 파일명
                     link.click();
                 } else {
                     alert("엑셀 파일 다운로드에 실패했습니다.");
