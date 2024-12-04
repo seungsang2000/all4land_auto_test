@@ -89,7 +89,7 @@ public class ExcelService {
 			}
 
 			// 데이터는 3번째 행 (인덱스 2)부터 시작
-			for (int i = 2; i < sheet.getLastRowNum() && i < 25; i++) { // '&& i < ???'은 테스트시 api 전체가 아닌 일부만을 호출하기 위한 것으로, 불필요 할 시 삭제
+			for (int i = 2; i < sheet.getLastRowNum(); i++) { // '&& i < ???'은 테스트시 api 전체가 아닌 일부만을 호출하기 위한 것으로, 불필요 할 시 삭제
 				boolean comma = false; // 쉼표 찍을 건지
 				Row row = sheet.getRow(i);
 				if (row == null)
@@ -116,7 +116,7 @@ public class ExcelService {
 						}
 						note += "레이어명 없음";
 					}
-					dataList.add(new LayerData(i - 1, layerName, layerEnglishName, "", "", "", "", "", note));
+					dataList.add(new LayerData(i - 1, layerName, layerEnglishName, "", "", "", "", "", note)); // 검사 결과는 빈칸 적용
 					continue;
 				}
 
@@ -209,7 +209,7 @@ public class ExcelService {
 	}
 
 	//WMS 이미지 호출 검사 코드
-	public boolean callWMSImage(String apiUrl) { //후에 수정해야 할거 : 이미지 파일을 가져오되, 레이어가 찍혀있는지...?
+	public boolean callWMSImage(String apiUrl) {
 
 		HttpURLConnection connection = null;
 		try {
@@ -255,37 +255,7 @@ public class ExcelService {
 		}
 	}
 
-	// WFS 호출. 정규식이 아닌 XML 파싱 사용
-	/*public boolean callWFS(String apiUrl, String layerCode) {  //전체를 가져와서 상당히 비효율적임. 후에 SAX Parser으로 수정
-		HttpURLConnection connection = null;
-		try {
-	
-			DocumentBuilderFactory dbFactoty = DocumentBuilderFactory.newInstance();
-			DocumentBuilder dBuilder = dbFactoty.newDocumentBuilder();
-			Document doc = dBuilder.parse(apiUrl);
-	
-			doc.getDocumentElement().normalize();
-			System.out.println("Root element: " + doc.getDocumentElement().getNodeName());
-	
-			NodeList nList = doc.getElementsByTagName("mapprime:" + layerCode.toLowerCase()); // xml 파싱시 대소문자 구분하므로, 소문자로 변환
-			System.out.println("파싱할 리스트 수 : " + nList.getLength()); // 이거 이용해볼까? 0개 이상일때 성공시켜도 될거 같은데.
-	
-			if (nList.getLength() > 0) {
-				return true;
-			} else {
-				return false;
-			}
-	
-		} catch (Exception e) {
-			System.err.println("API 호출 실패: " + apiUrl + "-" + e.getMessage());
-			return false;
-		} finally {
-			if (connection != null) {
-				connection.disconnect();
-			}
-		}
-	
-	}*/
+	// XML 파싱 방식 사용
 	public boolean callWFS(String apiUrl, String layerCode) {
 		try {
 			// XML 파서 준비
@@ -304,7 +274,7 @@ public class ExcelService {
 
 				@Override
 				public void endElement(String uri, String localName, String qName) throws SAXException {
-					// 필요시 종료 처리
+					//  종료 처리 (필요시)
 				}
 
 				@Override
@@ -422,7 +392,7 @@ public class ExcelService {
 		// 첫 번째 픽셀 색상 추출
 		int firstPixelColor = image.getRGB(0, 0);
 
-		// 이미지의 모든 픽셀을 순차적으로 확인... 매우 비효율적인 방식. 변경해야 할듯 => 생각보다 느리지 않다? wms 이미지 자체가 그리 크지 않게 와서 빠르게 처리된다
+		// 이미지의 모든 픽셀을 순차적으로 확인... 매우 비효율적인 방식. 변경해야 할듯 => 생각보다 느리지 않다? wms 이미지 자체가 그리 크지 않게 와서 빠르게 처리된다.
 		for (int y = 0; y < image.getHeight(); y++) {
 			for (int x = 0; x < image.getWidth(); x++) {
 				int pixelColor = image.getRGB(x, y);

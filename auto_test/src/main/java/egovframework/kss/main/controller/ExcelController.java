@@ -31,24 +31,6 @@ public class ExcelController {
 	@Autowired
 	private ExcelService excelService;
 
-	/*@PostMapping("/uploadExcel.do")
-	public void uploadExcel(@RequestParam("excelFile") MultipartFile file) {
-		try {
-			if (file == null || file.isEmpty()) {
-				System.out.println("파일이 전달되지 않았습니다.");
-				return;
-			}
-			System.out.println("파일 이름: " + file.getOriginalFilename());
-			// 파일 처리
-			List<LayerData> dataList = excelService.parseExcelFile(file);
-			System.out.println(dataList); // 데이터를 출력해서 확인
-	
-		} catch (Exception e) {
-			System.out.println("파일 처리 중 오류 발생: " + e.getMessage());
-			e.printStackTrace();
-		}
-	}*/
-
 	@PostMapping("/uploadExcel.do")
 	@ResponseBody
 	public void uploadExcel(@RequestParam("excelFile") MultipartFile file, HttpServletResponse response) {
@@ -63,7 +45,6 @@ public class ExcelController {
 
 			// 엑셀 파일 파싱
 			List<LayerData> dataList = excelService.parseExcelFile(file);
-			System.out.println("엑셀 파일에서 읽은 데이터: " + dataList);
 
 			// 엑셀 워크북 생성 (xlsx 포맷)
 			Workbook workbook = new XSSFWorkbook();  // XSSFWorkbook은 .xlsx 형식
