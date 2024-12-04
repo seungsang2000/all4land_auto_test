@@ -17,7 +17,7 @@ $(function(){
         var formData = new FormData(this); 
         
      	// 파일이 비어 있는지 확인
-        var fileInput = $("#excelFile")[0]; // 파일 입력 필드
+        var fileInput = $("#excelFile")[0];
         if (fileInput.files.length === 0) {
             alert("엑셀 파일을 선택해주세요.");
             return;  // 파일이 없으면 업로드를 중지
@@ -28,16 +28,16 @@ $(function(){
 
         fetch('/uploadExcel.do', {
             method: 'POST',
-            body: formData,  // formData에 파일 포함
+            body: formData,
         })
             .then(response => {
                 if (response.ok) {
                     const contentType = response.headers.get("Content-Type");
-                    if (contentType.includes("application/json")) {
+                    if (contentType.includes("application/json")) { // contentType이 json인지 확인.
                         return response.json().then(json => {
                             throw new Error(json.error);  // 서버에서 보낸 JSON 에러 메시지
                         });
-                    } else if (contentType.includes("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
+                    } else if (contentType.includes("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) { // contentType 확인
                         return response.blob();  // 엑셀 파일 다운로드 처리
                     }
                 } else {
@@ -80,7 +80,6 @@ $(function(){
 </head>
 <body>
 <h3>개방해 OpenAPI 자동 테스트 도구</h3>
-    <!-- 엑셀 파일 업로드 폼 -->
     <form name="popForm" method="post" enctype="multipart/form-data">
          <h4><label for="excelFile">파일찾기</label></h4>
 
@@ -89,7 +88,6 @@ $(function(){
         <!-- 업로드 버튼 -->
         <div class="btn-area">
             <button type="submit" id="testBtn" class="btn btn-yellow btn-ok">테스트</button>
-           <!--  <button type="button" onclick="self.close();" class="btn btn-yellow btn-cancel">창닫기</button> -->
         </div>
     </form>
 </body>

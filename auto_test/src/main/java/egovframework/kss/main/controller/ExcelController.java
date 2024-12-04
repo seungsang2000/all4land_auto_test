@@ -35,7 +35,7 @@ public class ExcelController {
 	@ResponseBody
 	public void uploadExcel(@RequestParam("excelFile") MultipartFile file, HttpServletResponse response) {
 		try {
-			if (file == null || file.isEmpty()) {
+			if (file == null || file.isEmpty()) { // 유효성 검사
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);  // 400 오류
 				response.setContentType("application/json; charset=UTF-8");
 				response.getWriter().write("파일이 전달되지 않았습니다.");

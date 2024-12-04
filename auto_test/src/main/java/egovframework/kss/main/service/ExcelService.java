@@ -85,11 +85,11 @@ public class ExcelService {
 			String JSONHeader = getCellValue(headerRow.getCell(16)); // Q열
 
 			if (!layerNameHeader.equals("명칭") || !layerEnglishHeader.equals("레이어명") || !url1Header.equals("WMS 예시") || !url2Header.equals("WMS 이미지") || !url3Header.equals("WFS") || !XMLHeader.equals("XML") || !JSONHeader.equals("JSON")) { // 액셀 파일 형식 검사
-				throw new Exception("액셀 파일의 양식이 다릅니다"); // 액셀 헤더가 양식과 다른 경우, 예외처리
+				throw new Exception("액셀 파일의 양식이 다릅니다"); // 유효성 검사. 액셀 헤더가 양식과 다른 경우 예외 발생
 			}
 
 			// 데이터는 3번째 행 (인덱스 2)부터 시작
-			for (int i = 2; i < sheet.getLastRowNum(); i++) { // '&& i < ???'은 테스트시 api 전체가 아닌 일부만을 호출하기 위한 것으로, 불필요 할 시 삭제
+			for (int i = 2; i < sheet.getLastRowNum() && i < 52; i++) { // '&& i < ???'은 테스트시 api 전체가 아닌 일부만을 호출하기 위한 것으로, 불필요 할 시 삭제
 				boolean comma = false; // 쉼표 찍을 건지
 				Row row = sheet.getRow(i);
 				if (row == null)
