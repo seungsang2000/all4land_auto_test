@@ -1,6 +1,5 @@
 package egovframework.kss.main.controller;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -94,10 +93,10 @@ public class ExcelController {
 			}
 
 			// 엑셀 파일을 서버의 로컬 디스크에 저장 (선택)
-			try (FileOutputStream fileOut = new FileOutputStream("C:/Temp/TestData.xlsx")) {
+			/*try (FileOutputStream fileOut = new FileOutputStream("C:/Temp/TestData.xlsx")) {
 				workbook.write(fileOut);
 			}
-			System.out.println("엑셀 파일이 서버에 저장되었습니다. 파일 경로: C:/Temp/TestData.xlsx");
+			System.out.println("엑셀 파일이 서버에 저장되었습니다. 파일 경로: C:/Temp/TestData.xlsx");*/
 
 			// 파일 다운로드 응답 설정
 			response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -115,8 +114,8 @@ public class ExcelController {
 			}
 
 		} catch (Exception e) {
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);  // 500 오류
-			response.setContentType("application/json; charset=UTF-8");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.setContentType("application/json; charset=UTF-8"); // 서버에서 에러 발생시 json형식으로 응답
 			try {
 				response.getWriter().write(e.getMessage());
 			} catch (IOException e1) {

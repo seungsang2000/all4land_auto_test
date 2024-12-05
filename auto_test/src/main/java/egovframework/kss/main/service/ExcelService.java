@@ -255,7 +255,7 @@ public class ExcelService {
 		}
 	}
 
-	// XML 파싱 방식 사용
+	// WFS 호출. SAX Parser로 xml 파싱.
 	public boolean callWFS(String apiUrl, String layerCode) {
 		try {
 			// XML 파서 준비
@@ -287,7 +287,7 @@ public class ExcelService {
 			InputStream inputStream = new URL(apiUrl).openStream();
 			xmlReader.parse(new InputSource(inputStream));
 
-			// SAXException이 발생하지 않으면 레이어가 존재하지 않음
+			// SAXException이 발생하지 않았으므로 레이어가 존재하지 않는다
 			return false;
 		} catch (SAXException e) {
 			return e.getMessage().contains("레이어 발견 성공");
@@ -310,9 +310,8 @@ public class ExcelService {
 			doc.getDocumentElement().normalize();
 
 			NodeList nList = doc.getElementsByTagName("item");
-			System.out.println("파싱할 리스트 수 : " + nList.getLength()); // item 태그 개수 가져오기
 
-			if (nList.getLength() > 0) {
+			if (nList.getLength() > 0) { // item 태그가 1개라도 존재한다면, 데이터를 잘 받아왔다는 의미이므로 성공
 				return true;
 			} else {
 				return false;
@@ -329,6 +328,7 @@ public class ExcelService {
 
 	}
 
+	//JSON 호출
 	public boolean callJSON(String jsonUrl) {
 		HttpURLConnection connection = null;
 		try {
@@ -367,13 +367,13 @@ public class ExcelService {
 		return false;
 	}
 
+	// 객체 또는 배열이 비어있는지 확인하는 메소드
 	private boolean isJsonDataNonEmpty(String jsonData) {
 		try {
 			// JSON 파싱
 			ObjectMapper objectMapper = new ObjectMapper();
 			JsonNode rootNode = objectMapper.readTree(jsonData);
 
-			// 객체 또는 배열이 비어있는지 확인
 			if (rootNode.isObject()) {
 				return rootNode.size() > 0; // 객체에 속성이 있는지 확인
 			} else if (rootNode.isArray()) {
