@@ -166,7 +166,7 @@ public class ExcelService {
 	public boolean callWMS(String apiUrl, String layerCode) {
 		HttpURLConnection connection = null;
 		try {
-			if (!apiUrl.toLowerCase().contains(layerCode.toLowerCase())) { //url에 검사 레이어의 코드가 들어있지 않은 경우
+			if (!apiUrl.toLowerCase().contains(layerCode.toLowerCase())) { //url에 검사할 레이어의 코드가 들어있지 않은 경우
 				System.out.println("url에 레이어가 포함되어 있지 않습니다.");
 				return false;
 			}
@@ -238,7 +238,7 @@ public class ExcelService {
 
 			// Content-Type 헤더 확인
 			String contentType = connection.getContentType();
-			if (contentType != null && contentType.startsWith("image/png")) {
+			if (contentType != null && contentType.startsWith("image/png")) { // 응답이 image/png인지 여부 판단 
 				InputStream inputStream = connection.getInputStream();
 				boolean isMonochrome = isImageMonochrome(inputStream); // 이미지가 단색인지 여부 판단
 
@@ -263,7 +263,7 @@ public class ExcelService {
 		}
 	}
 
-	// WFS 호출. SAX Parser로 xml 파싱.
+	// WFS 호출. SAX Parser로 xml 파싱
 	public boolean callWFS(String apiUrl, String layerCode) {
 		try {
 			if (!apiUrl.toLowerCase().contains(layerCode.toLowerCase())) {
@@ -405,7 +405,7 @@ public class ExcelService {
 		// 첫 번째 픽셀 색상 추출
 		int firstPixelColor = image.getRGB(0, 0);
 
-		// 이미지의 모든 픽셀을 순차적으로 확인... 매우 비효율적인 방식. 변경해야 할듯 => 생각보다 느리지 않다? wms 이미지 자체가 그리 크지 않게 와서 빠르게 처리된다.
+		// 이미지의 모든 픽셀을 순차적으로 확인... 매우 비효율적인 방식. 변경해야 할듯 => 생각보다 느리지 않다. wms 이미지 자체가 그리 크지 않게 와서 빠르게 처리된다.
 		for (int y = 0; y < image.getHeight(); y++) {
 			for (int x = 0; x < image.getWidth(); x++) {
 				int pixelColor = image.getRGB(x, y);

@@ -34,6 +34,7 @@ public class ExcelController {
 	@ResponseBody
 	public void uploadExcel(@RequestParam("excelFile") MultipartFile file, HttpServletResponse response) {
 		try {
+			System.out.println("OpenAPI 호출 테스트 시작");
 			if (file == null || file.isEmpty()) { // 유효성 검사
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);  // 400 오류
 				response.setContentType("application/json; charset=UTF-8");

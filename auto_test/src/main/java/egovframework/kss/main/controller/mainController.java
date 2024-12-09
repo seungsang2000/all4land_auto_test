@@ -8,7 +8,6 @@ public class mainController {
 
 	@RequestMapping("/main.do")
 	public String mainPage() {
-		System.out.println("테스트테스트");
 		return "main";
 	}
 }
