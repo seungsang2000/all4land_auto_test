@@ -100,8 +100,8 @@ public class ExcelService {
 				String url1 = getCellValue(row.getCell(12));  // K열
 				String url2 = getCellValue(row.getCell(13));  // L열
 				String url3 = getCellValue(row.getCell(14));  // M열
-				String XMLUrl = getCellValue(row.getCell(15));  // L열
-				String JSONUrl = getCellValue(row.getCell(16));  // M열
+				String XMLUrl = getCellValue(row.getCell(15));  // N열
+				String JSONUrl = getCellValue(row.getCell(16));  // O열
 				String note = "";
 
 				if (layerName.trim().isEmpty() || layerEnglishName.trim().isEmpty()) { //레이어의 명칭이나 레이어명이 없는 항목은 테스트하지 않고 넘어감. url 틀릴 경우 대비
@@ -124,7 +124,7 @@ public class ExcelService {
 				url1 = !url1.trim().isEmpty() ? (callWMS(url1, layerEnglishName) ? "O" : "X") : "입력값 없음";
 
 				// URL2 테스트 및 결과 저장
-				url2 = !url2.trim().isEmpty() ? (callWMSImage(url2) ? "O" : "X") : "입력값 없음";
+				url2 = !url2.trim().isEmpty() ? (callWMSImage(url2, layerEnglishName) ? "O" : "X") : "입력값 없음";
 
 				// URL3 테스트 및 결과 저장
 				url3 = !url3.trim().isEmpty() ? (callWFS(url3, layerEnglishName) ? "O" : "X") : "입력값 없음";
@@ -166,6 +166,10 @@ public class ExcelService {
 	public boolean callWMS(String apiUrl, String layerCode) {
 		HttpURLConnection connection = null;
 		try {
+			if (!apiUrl.toLowerCase().contains(layerCode.toLowerCase())) { //url에 검사 레이어의 코드가 들어있지 않은 경우
+				System.out.println("url에 레이어가 포함되어 있지 않습니다.");
+				return false;
+			}
 
 			URL url = new URL(apiUrl);
 
@@ -209,10 +213,14 @@ public class ExcelService {
 	}
 
 	//WMS 이미지 호출 검사 코드
-	public boolean callWMSImage(String apiUrl) {
+	public boolean callWMSImage(String apiUrl, String layerCode) {
 
 		HttpURLConnection connection = null;
 		try {
+			if (!apiUrl.toLowerCase().contains(layerCode.toLowerCase())) {
+				System.out.println("url에 레이어가 포함되어 있지 않습니다.");
+				return false;
+			}
 
 			URL url = new URL(apiUrl);
 
@@ -258,6 +266,11 @@ public class ExcelService {
 	// WFS 호출. SAX Parser로 xml 파싱.
 	public boolean callWFS(String apiUrl, String layerCode) {
 		try {
+			if (!apiUrl.toLowerCase().contains(layerCode.toLowerCase())) {
+				System.out.println("url에 레이어가 포함되어 있지 않습니다.");
+				return false;
+			}
+
 			// XML 파서 준비
 			XMLReader xmlReader = XMLReaderFactory.createXMLReader();
 
